@@ -14,7 +14,7 @@ public class BoardController {
     }
 
     @GetMapping("/board/echo")
-    public ModelAndView getEcho(@RequestParam String title, //타이틀로 온 파라미터 값을 메인에 넣어줌
+    public ModelAndView getEcho(@RequestParam("title") String title, //타이틀로 온 파라미터 값을 메인에 넣어줌
                           @RequestParam String content) {
         ModelAndView result = new ModelAndView("board/echo");//페이지로 넣을 수 있는 곳
         result.getModel().put("title", title);
@@ -25,7 +25,7 @@ public class BoardController {
 
     @PostMapping("/board/echo")
     public ModelAndView postEcho(@RequestParam String title,
-                                @RequestParam String content) {
+                                 @RequestParam String content) {
         ModelAndView result = new ModelAndView("board/echo");//응답을 하면 사용되는 객체
         result.getModel().put("title", title); //변수부분도 바꿔줘야 함
         result.getModel().put("content", content);
