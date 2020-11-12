@@ -1,46 +1,62 @@
 package com.study.server.ex1.controller;
 
+import com.study.server.ex1.repository.BoardRepository;
+import com.study.server.ex1.domain.Board;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.List;
+
 @Controller
-//@RequestMapping("/board") 메소드마다 보드가 중복되있어서 클래스 위에 하나로 연결하는 역활을 한다. 저걸 통해서
+@RequestMapping("/board")
 public class BoardController {
-    @GetMapping("/board")
-    public String getBoard() {
-        return "board/index";
-    }
+    @Autowired
+    private BoardRepository repository;
 
-    @GetMapping("/board/echo")
-    public ModelAndView getEcho(@RequestParam("title") String title, //타이틀로 온 파라미터 값을 메인에 넣어줌
-                          @RequestParam String content) {
-        ModelAndView result = new ModelAndView("board/echo");//페이지로 넣을 수 있는 곳
-        result.getModel().put("title", title);
-        result.getModel().put("content", content);
+    @GetMapping("")
+    public ModelAndView getHomeForModel() {
+        List<Board> boardList = repository.findAll();
+
+        ModelAndView result = new ModelAndView("board/index");
+        result.addObject(boardList);
 
         return result;
     }
 
-    @PostMapping("/board/echo")
-    public ModelAndView postEcho(@RequestParam String title,
-                                 @RequestParam String content) {
-        ModelAndView result = new ModelAndView("board/echo");//응답을 하면 사용되는 객체
-        result.getModel().put("title", title); //변수부분도 바꿔줘야 함
-        result.getModel().put("content", content);
+    // Redirect를 통해 다른 페이지로 안보내면 문제점
+    // > 새로고침하면 데이터가 계속 저장될 수 있음
+    // 설명 필요
+    /*@PostMapping("/params")
+    public String postBoardWithParams(@RequestParam("title") String title,
+                            @RequestParam("password") String password,
+                            @RequestParam("content") String content) {
+        // 각 파라미터들을 1개의 데이터로 묶음
+        // 묶은 데이터를 repository를 이용하여 저장
+        // 저장된 게시글을 볼 수 있도록 페이지 이동
 
-        return result;
-    }
-
-    /*@GetMapping("")
-    public String getBoard() {
-        return "board/index";
-    }
-
-    @GetMapping("/echo")
-    public String getEcho() {
-        return "board/echo";
+        return "";
     }*/
-    //그냥 보드로 오면 여기 주석처리 되있는 부분의 메소드를 실행해라 라는 뜻
+
+    @PostMapping("")
+    public String postBoardWithParams(@ModelAttribute Board board) {
+        Board savedBoard = repository.save(board);
+        // Redirect item page with board number
+
+        String redirectUrl = "redirect:/board/" + savedBoard.getId();
+
+        return redirectUrl;
+    }
+
+    @GetMapping("/{id}")
+    public ModelAndView getBoardItem(@PathVariable("id") Integer boardId) {
+        // Get item of boards
+        Board board = repository.getOne(boardId);
+
+        ModelAndView result = new ModelAndView("board/item");
+        result.getModel().put("boardItem", board);
+        return result;
+    }
+
 }
